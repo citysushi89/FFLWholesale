@@ -31,8 +31,10 @@ bootstrap = Bootstrap(app)
 SECRET_KEY = os.environ["SECRET_KEY"]
 app.config["SECRET_KEY"] = SECRET_KEY
 
-##CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
+# CONNECT TO DB - Production
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", 'sqlite:///userdata.db')
+# CONNECT To DB development - Production
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
