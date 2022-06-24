@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+<body>
+<!--    Actual FLASK WTFORM      -->
+    {% block content %}
+        <div class="col-sm">
+
+            {% with messages = get_flashed_messages() %}
+               {% if messages %}
+                 {% for message in messages %}
+                   <p>{{ message }}</p>
+                 {% endfor %}
+
+            <form method="POST" action="" class="form-control">
+                {{ form.hidden_tag()}}
+
+                    {{ form.user_wholesalers.label }}
+                    {{ form.user_wholesalers(name="wholesale_selector")}}
+
+                    {{ form.submit(class="btn btn-secondary")}}
+
+            </form>
+        </div>
+    {% endblock content %}
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+<body>
+<!--    Actual FLASK WTFORM      -->
+<div class="container">
+         <div class="row">
+           <div class="col-lg-8 col-md-10 mx-auto content">
+               <form method="POST" action="" class="big-padding-top just-font-family">
+                {{ form.hidden_tag()}}
+                    {{ form.name.label(class="form-label")}}
+                    {{ form.name(class="form-control") }}
+                <br>
+                    {{ form.email.label(class="form-label")}}
+                    {{ form.email(class="form-control") }}
+                <br>
+                    {{ form.password.label(class="form-label")}}
+                    {{ form.password(class="form-control") }}
+                <br>
+
+                    {{ form.company.label(class="form-label")}}
+                    {{ form.company(class="form-control") }}
+                <br>
+
+                {{form.submit(class="btn btn-primary")}}
+
+            </form>
+
+               </div>
+         </div>
+    </div>
+
+
+</body>
+</html>
+{% endblock %}

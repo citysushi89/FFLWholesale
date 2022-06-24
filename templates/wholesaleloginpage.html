@@ -1,0 +1,38 @@
+{% include "header.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+<body>
+    <!--    Test if I DO NOT need a for loop-->
+
+        <div class="row">
+            <div class="col-sm">
+               {% with messages = get_flashed_messages() %}
+                   {% if messages %}
+                         {% for message in messages %}
+                           <p>{{ message }}</p>
+                         {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <form method="POST" action="" class="big-padding-top">
+                    {{ form.hidden_tag()}}
+
+                        {{ form.wholesale_selector.label }}
+                        {{ form.wholesale_selector }}
+                    <br>
+                        {{ form.wholesale_username.label }}
+                        {{ form.wholesale_username }}
+                   <br>
+                        {{ form.wholesale_password.label }}
+                        {{ form.wholesale_password }}
+                    <br>
+                        {{ form.save_info(class="btn btn-secondary")}}
+                        {{ form.save_and_run(class="btn btn-secondary")}}
+
+                </form>
+            </div>
+        </div>
+
+</body>
+</html>
+   {% endblock content %}
