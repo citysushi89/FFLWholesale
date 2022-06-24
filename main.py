@@ -1,3 +1,5 @@
+import os
+
 import chardet
 from flask import Flask, render_template, url_for, redirect, request, flash, session
 from forms import WholesaleSelectorForm, RegisterForm, LoginForm, HomePageActionSelector, RunReportSelector, wholesalers_list
@@ -26,7 +28,8 @@ bootstrap = Bootstrap(app)
 # TODO: launch actual site using free github to start
 
 # TODO: NEED TO UPDATE TO SOMETHING REALLY SECRET LATER
-app.config["SECRET_KEY"] = "23qrfa542ywqaehgfj874weaszf67062314595dfgzhgfsbgdzhtyre123"
+SECRET_KEY = os.environ["SECRET_KEY"]
+app.config["SECRET_KEY"] = SECRET_KEY
 
 ##CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
