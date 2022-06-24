@@ -15,8 +15,8 @@ def get_chattanooga_shooting_data():
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
     driver = webdriver.Chrome(service=s)
 
-    EMAIL = os.environ["EMAIL"]
-    PASSWORD = os.environ["PASSWORD"]
+    EMAIL = os.getenv("EMAIL")
+    PASSWORD = os.getenv("PASSWORD")
 
     # Opening URL
     driver.get(URL)

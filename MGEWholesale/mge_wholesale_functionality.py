@@ -22,8 +22,8 @@ def get_mge_wholesale_data():
 
     # LOGIN DATA: using environment variables
 
-    CUSTOMER_NUMBER = "220713"
-    PASSWORD = "PPsemporium5"
+    CUSTOMBER_NUMBER = os.getenv("CUSTOMER_NUMBER")
+    PASSWORD = os.getenv("PASSWORD")
 
 
     # # Loading the webpage

@@ -22,8 +22,9 @@ def get_orion_wholesale_data():
     # Setting up connection to driver and site
     URL = "https://www.orionfflsales.com/"
 
-    EMAIL = os.environ["EMAIL"]
-    PASSWORD = os.environ["PASSWORD"]
+
+    EMAIL = os.getenv("EMAIL")
+    PASSWORD = os.getenv("PASSWORD")
 
     # Setting up the iterations, using formulas from functions.py
     open_url(URL, driver)

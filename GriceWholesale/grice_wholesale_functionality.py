@@ -16,8 +16,8 @@ def get_grice_wholesale_data():
     chrome_driver_path = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver"
 
     # Getting login info using environment variables
-    EMAIL = os.environ["EMAIL"]
-    PASSWORD = os.environ["PASSWORD"]
+    EMAIL = os.getenv("EMAIL_SECOND")
+    PASSWORD = os.getenv("PASSWORD")
 
     driver = webdriver.Chrome(service=s)
     driver.get(URL)
