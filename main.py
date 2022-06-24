@@ -32,7 +32,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 app.config["SECRET_KEY"] = SECRET_KEY
 
 # CONNECT TO DB - Production
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", 'sqlite:///userdata.db')
+uri = os.getenv("DATA_BASE_URL")
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
+
 # CONNECT To DB development - Production
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
