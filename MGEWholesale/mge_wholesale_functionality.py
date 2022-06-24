@@ -598,7 +598,7 @@ def get_mge_wholesale_data():
     master_list = [*new_derringer_list, *new_pistol_list, *new_pistol_frame_list, *new_revolver_list, *new_rifle_list,
                    *new_rifle_frame_list, *new_shotgun_list, *new_california_compliant_list]
 
-    with open("Data/WholesalerReports/mge_wholesale_data.csv", "w", newline="") as file:
+    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\mge_wholesale_data.csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writeheader()
         writer.writerows(master_list)

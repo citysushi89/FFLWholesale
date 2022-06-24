@@ -188,7 +188,7 @@ def get_grice_wholesale_data():
     # Preping to Write
     headers = list_categories
 
-    with open("Data/WholesalerReports/grice_wholesale_data.csv", "w", newline="") as file:
+    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\grice_wholesale_data.csv", "w", newline="") as file:
         csv_writer = csv.DictWriter(file, fieldnames=headers)
         csv_writer.writeheader()
         csv_writer.writerows(master_list)
