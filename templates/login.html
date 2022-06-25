@@ -4,7 +4,7 @@
 <body>
 
     <div class="container">
-         <div class="row">
+         <div class="row big-padding-top">
                <div class="col-lg-8 col-md-10 mx-auto content">
                  {% with messages = get_flashed_messages() %}
                    {% if messages %}
@@ -14,7 +14,7 @@
                    {% endif %}
                  {% endwith %}
 
-            <form method="POST" action="" class="big-padding-top just-font-family">
+            <form method="POST" action="" class="just-font-family">
                 {{ form.hidden_tag()}}
 
                     {{ form.email.label(class="form-label")}}
