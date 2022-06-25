@@ -37,8 +37,11 @@ app.config["SECRET_KEY"] = SECRET_KEY
 # if uri.startswith("postgres://"):
 #     uri = uri.replace("postgres://", "postgresql://", 1)
 # app.config['SQLALCHEMY_DATABASE_URI'] = uri
-sample = os.getenv("DATA_BASE_URL")
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATA_BASE_URL")
+sample = os.getenv("DATABASE_URL1")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATA_BASE_URL", "sqlite:///userdata.db")
+
+print(sample)
+
 
 # CONNECT To DB development - Production
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
@@ -206,7 +209,7 @@ def run_report():
         for item in form.user_wholesalers_selected_by_check_boxes.data:
             user_selected_wholesalers_for_report.append(item)
             user_selected_wholesalers_for_report_string += item + ", "
-        flash(f"You have selected: {user_selected_wholesalers_for_report_string} for your report. Please allow 5 minutes for the email to be and received.")
+        flash(f"You have selected: {user_selected_wholesalers_for_report_string} for your report. Please allow 5 minutes for the request to be processed and sent.")
         # Combining selected CSVs
         from functions import combine_user_csvs, send_email
         combine_user_csvs(user_selected_wholesalers_for_report)

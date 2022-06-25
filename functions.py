@@ -168,11 +168,8 @@ def send_email(filename, to_address):
     server.login(from_address, password=PASSWORD)
     server.send_message(msg, from_addr=from_address, to_addrs=to_address)
 
-
-def combine_user_csvs(user_selected_wholesalers_for_report):
-    import pandas as pd
-    # Converting customer_id into a form (just the digits)that will store in a file
-    # (did not like <User 1>)
+# Converts current_user from "<User 1>" to "1"
+def get_just_user_decimal():
     from main import current_user
     string_current_user = str(current_user)
     current_user_list = []
@@ -194,6 +191,12 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
         else:
             current_user_list.append(item)
     user_number = current_user_list[0]
+    return user_number
+
+def combine_user_csvs(user_selected_wholesalers_for_report):
+    import pandas as pd
+    # Converting customer_id into a form (just the digits)that will store in a file
+    user_number = get_just_user_decimal()
 
     list_specific_to_user_to_compile_csv_with = []
     # TODO, UPDATE: as new wholesalers are added, need to be included below the for loop
@@ -250,19 +253,15 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
             zanders_read_file = pd.read_csv(zanders_new_file)
             test_list.append(zanders_read_file)
 
-    # this_user = get_current_user()
+    this_user = get_current_user()
     # Getting datetime for filename so it does not keep appending itself
     from datetime import datetime
     now = datetime.now()
-    # Use time below if wanting to include the hour and day
-    # date_report_saved = now.strftime("%I%p_%d%b%y")
-    # Use time below if wanting to include just the day day
     date_report_saved = now.strftime("%d%b%y")
 
+    print(this_user)
     data = pd.concat(test_list)
-    data.to_csv(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\Users\1\wholesaler_data.csv", index=False)
-    # Below just spits out the csv into the big file
-    data.to_csv("master_list_test.csv", index=False)
+    data.to_csv(rf"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\Users\{user_number}\wholesaler_data{date_report_saved}.csv", index=False)
 
 
     # return f"Data/Users/{user_number}/all_wholesaler_data_{date_report_saved}.csv"
