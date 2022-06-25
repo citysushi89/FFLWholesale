@@ -107,6 +107,7 @@ def convert_selenium_objects_to_list_of_links(input_list):
 
 
 def get_current_user():
+    pass
     # SHOULD NOT NEED DUE TO:
     # from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user,
     #
