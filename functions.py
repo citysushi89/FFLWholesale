@@ -107,17 +107,21 @@ def convert_selenium_objects_to_list_of_links(input_list):
 
 
 def get_current_user():
-    import sqlite3
-    import re
-
-    # Accessing the db to display the info the user has existing in the system
+    # SHOULD NOT NEED DUE TO:
+    # from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user,
+    #
+    # import sqlite3
+    # import re
+    #
+    # # TODOL
+    # # Accessing the db to display the info the user has existing in the system
     # connection = sqlite3.connect("userdata.db")
     # cursor = connection.cursor()
-    # TODO Before Launch: Change the below getting user id to actually get user ID
-    # Getting the user id
-    current_user = "<User 1>"
-    this_user = str(current_user)
-    return this_user
+    # # TODO Before Launch: Change the below getting user id to actually get user ID
+    # # Getting the user id
+    # current_user = "<User 1>"
+    # this_user = str(current_user)
+    # return this_user
 
 
 def send_email(filename, to_address):
