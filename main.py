@@ -24,10 +24,7 @@ bootstrap = Bootstrap(app)
 # TODO 2: Homepage
     # TODO 2.1: extend footer to other html files
 
-# For launch
-# TODO: launch actual site using free github to start
 
-# TODO: NEED TO UPDATE TO SOMETHING REALLY SECRET LATER
 SECRET_KEY = os.getenv("SECRET_KEY")
 app.config["SECRET_KEY"] = SECRET_KEY
 
@@ -39,9 +36,6 @@ app.config["SECRET_KEY"] = SECRET_KEY
 # app.config['SQLALCHEMY_DATABASE_URI'] = uri
 sample = os.getenv("DATABASE_URL1")
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATA_BASE_URL", "sqlite:///userdata.db")
-
-print(sample)
-
 
 # CONNECT To DB development - Production
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
@@ -103,8 +97,6 @@ class UserReportSelections(db.Model):
 # Need these lines so that user_wholesalers can go from the route '/' to the form WholesalerLoginForm in forms.py
 global grice_wholesale_username, grice_wholesale_password, mge_wholesale_username, mge_wholesale_password
 
-
-# run_report_for_testing_purposes()
 # Page to select to login or register
 # Needs to stay above the wholesaler login and running report page
 @app.route('/', methods=["POST", "GET"])
@@ -154,7 +146,6 @@ def wholesale_selector_page():
     # if request.method == "POST":
     if form.validate_on_submit():
         user_wholesalers = request.form.getlist("user_wholesalers")
-        print(user_wholesalers)
         return redirect(url_for("wholesale_login_page", form=form,  user_wholesalers=user_wholesalers))
     return render_template("wholesalerselectorpage.html", form=form, logged_in=current_user.is_authenticated)
 

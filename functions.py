@@ -274,8 +274,8 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
 
 
 def run_report_for_testing_purposes():
-    from MGEWholesale.mge_wholesale_functionality import get_mge_wholesale_data
-    get_mge_wholesale_data()
+    # from MGEWholesale.mge_wholesale_functionality import get_mge_wholesale_data
+    # get_mge_wholesale_data()
     from GriceWholesale.grice_wholesale_functionality import get_grice_wholesale_data
     get_grice_wholesale_data()
     from ChattanoogaShooting.chattanooga_shooting_functionality import get_chattanooga_shooting_data
