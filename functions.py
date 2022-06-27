@@ -230,9 +230,10 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
             orion_read_file = pd.read_csv(orion_new_file)
             test_list.append(orion_read_file)
         elif item == "Zanders":
-            zanders_new_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\zanders_data.csv"
+            zanders_new_file = r"C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/zanders_data.csv"
             zanders_read_file = pd.read_csv(zanders_new_file)
-            test_list.append(zanders_read_file)
+            test_list.append(zanders_read_file)\
+
         elif item == "Select All":
             grice_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/grice_wholesale_data.csv"
             grice_read_file = pd.read_csv(grice_new_file)
