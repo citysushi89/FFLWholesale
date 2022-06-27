@@ -1,5 +1,4 @@
 import os
-
 import chardet
 from flask import Flask, render_template, url_for, redirect, request, flash, session
 from forms import WholesaleSelectorForm, RegisterForm, LoginForm, HomePageActionSelector, RunReportSelector, wholesalers_list
@@ -12,6 +11,8 @@ from flask_login import UserMixin, login_user, LoginManager, logout_user, curren
 from flask_bootstrap import Bootstrap
 from datetime import datetime
 from functions import run_report_based_on_time, run_report_for_testing_purposes, combine_user_csvs
+# Below imports a module that outputs more info in Heroku logs
+import logging
 
 
 app = Flask(__name__)
@@ -41,6 +42,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATA_BASE_URL", "sqlite:///us
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+# Setting up the logger to get more detailer info from Heroku logs
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.ERROR)
 
 
 # Creating Login functionality
