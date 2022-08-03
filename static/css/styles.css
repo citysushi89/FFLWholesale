@@ -11631,8 +11631,6 @@ footer a:hover, footer a:active, footer a:focus {
 
 
 
-
-
 .center-text{
     text-align: center;
 }
@@ -11653,4 +11651,11 @@ footer a:hover, footer a:active, footer a:focus {
 
 .rounded-circle-owen {
     border-radius: 3% !important;
+}
+
+/*! Run Report Page */
+
+.table-item {
+    max-width: 15%;
+    width: 15px;
 }
