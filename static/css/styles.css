@@ -11633,7 +11633,9 @@ footer a:hover, footer a:active, footer a:focus {
 
 
 
-
+.center-text{
+    text-align: center;
+}
 
 .big-padding-top {
     padding-top: 6.5rem;

@@ -38,7 +38,7 @@ class WholesalerLoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
    email = StringField("Email", validators=[DataRequired()])
-   password = PasswordField("Password", validators=[DataRequired()])
+   password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
    name = StringField("Name", validators=[DataRequired()])
    company = StringField("Company", validators=[DataRequired()])
    submit = SubmitField("Sign Up")
@@ -55,7 +55,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-# IP June 4th
+# IP June 4th - EMAIL run report, creating a new run report just for downloading
 class RunReportSelector(FlaskForm):
     # Accessing the db to display the info the user has existing in the system
     connection = sqlite3.connect("userdata.db")
@@ -76,20 +76,25 @@ class RunReportSelector(FlaskForm):
         list_of_wholesalers_selected_by_checkboxes.append(item[2])
     # Adding an option at the bottom to select All
     list_of_wholesalers_selected_by_checkboxes.append("Select All")
-
     # Populating check boxes
-    #
     user_wholesalers_selected_by_check_boxes = MultiCheckBoxField("Select which wholesalers to include in the report",
                                                 choices=list_of_wholesalers_selected_by_checkboxes,
                                                 render_kw={'style': 'height: 15px; margin: 10px; width: 65%; list-style: none;'})
-
-
     run_report_now = SubmitField("Email me the report now")
-
     # time_question = TimeField("Select the time you would like to receive the report")
     time_question = wholesale_selector = SelectField("Choose when you would like the report to be sent: ",
                                                      choices=TIMES_THE_REPORT_CAN_BE_SENT)
-
-
     run_recurring_report = SubmitField("Set up recurring email report")
 
+
+class RunReportDownload(FlaskForm):
+    list_of_wholesalers_selected_by_checkboxes = []
+    for wholesaler in wholesalers_list:
+        list_of_wholesalers_selected_by_checkboxes.append(wholesaler)
+    # Adding an option at the bottom to select All
+    list_of_wholesalers_selected_by_checkboxes.append("Select All")
+    # Populating check boxes
+    user_wholesalers_selected_by_check_boxes = MultiCheckBoxField("Select Your Wholesalers",
+                                                choices=list_of_wholesalers_selected_by_checkboxes,
+                                                render_kw={'style': 'height: 15px; margin: 10px; width: 65%; list-style: none;'})
+    download_report = SubmitField("Download Report")

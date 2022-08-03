@@ -10,7 +10,7 @@ import csv, os
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
     convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links, \
     convert_selenium_objects_to_list_zanders_cost
-
+from functions import upload_to_bucket
 
 def get_zanders_data():
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
@@ -112,8 +112,8 @@ def get_zanders_data():
 
 
     headers = ["firearm_type", "price", "link", "stock_status"]
-    zanders_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\zanders_data_encoded.csv"
-    new_zanders_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\zanders_data.csv"
+    zanders_file = "\\static/Data\\WholesalerReports\\zanders_data_encoded.csv"
+    new_zanders_file = "\\Data\\WholesalerReports\\zanders_data.csv"
     with open(zanders_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)

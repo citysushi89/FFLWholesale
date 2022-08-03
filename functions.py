@@ -210,52 +210,52 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
     # Grabbing the CSVs of the selected wholesalers
     for item in user_selected_wholesalers_for_report:
         if item == "Grice Wholesale":
-            grice_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/grice_wholesale_data.csv"
+            grice_new_file = "Data/WholesalerReports/grice_wholesale_data.csv"
             grice_read_file = pd.read_csv(grice_new_file)
             test_list.append(grice_read_file)
         elif item == "MGE Wholesale":
-            mge_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/mge_wholesale_data.csv"
+            mge_new_file = "Data/WholesalerReports/mge_wholesale_data.csv"
             mge_read_file = pd.read_csv(mge_new_file)
             test_list.append(mge_read_file)
         elif item == "Chattanooga Shooting":
-            chattanooga_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/chattanooga_shooting_data.csv"
+            chattanooga_new_file = "Data/WholesalerReports/chattanooga_shooting_data.csv"
             chattanooga_read_file = pd.read_csv(chattanooga_new_file)
             test_list.append(chattanooga_read_file)
         elif item == "Second Amendment Wholesale":
-            second_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/second_amendment_wholesale_data.csv"
+            second_new_file = "Data/WholesalerReports/second_amendment_wholesale_data.csv"
             second_read_file = pd.read_csv(second_new_file)
             test_list.append(second_read_file)
         elif item == "Orion Wholesale":
-            orion_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/orion_wholesale_data.csv"
+            orion_new_file = "Data/WholesalerReports/orion_wholesale_data.csv"
             orion_read_file = pd.read_csv(orion_new_file)
             test_list.append(orion_read_file)
         elif item == "Zanders":
-            zanders_new_file = r"C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/zanders_data.csv"
+            zanders_new_file = r"Data/WholesalerReports/zanders_data.csv"
             zanders_read_file = pd.read_csv(zanders_new_file)
-            test_list.append(zanders_read_file)\
+            test_list.append(zanders_read_file)
 
         elif item == "Select All":
-            grice_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/grice_wholesale_data.csv"
+            grice_new_file = "Data/WholesalerReports/grice_wholesale_data.csv"
             grice_read_file = pd.read_csv(grice_new_file)
             test_list.append(grice_read_file)
 
-            mge_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/mge_wholesale_data.csv"
+            mge_new_file = "Data/WholesalerReports/mge_wholesale_data.csv"
             mge_read_file = pd.read_csv(mge_new_file)
             test_list.append(mge_read_file)
 
-            chattanooga_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/chattanooga_shooting_data.csv"
+            chattanooga_new_file = "Data/WholesalerReports/chattanooga_shooting_data.csv"
             chattanooga_read_file = pd.read_csv(chattanooga_new_file)
             test_list.append(chattanooga_read_file)
 
-            second_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/second_amendment_wholesale_data.csv"
+            second_new_file = "Data/WholesalerReports/second_amendment_wholesale_data.csv"
             second_read_file = pd.read_csv(second_new_file)
             test_list.append(second_read_file)
 
-            orion_new_file = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports/orion_wholesale_data.csv"
+            orion_new_file = "Data/WholesalerReports/orion_wholesale_data.csv"
             orion_read_file = pd.read_csv(orion_new_file)
             test_list.append(orion_read_file)
 
-            zanders_new_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\zanders_data.csv"
+            zanders_new_file = r"Data\WholesalerReports\zanders_data.csv"
             zanders_read_file = pd.read_csv(zanders_new_file)
             test_list.append(zanders_read_file)
 
@@ -275,8 +275,8 @@ def combine_user_csvs(user_selected_wholesalers_for_report):
 
 
 def run_report_for_testing_purposes():
-    # from MGEWholesale.mge_wholesale_functionality import get_mge_wholesale_data
-    # get_mge_wholesale_data()
+    from MGEWholesale.mge_wholesale_functionality import get_mge_wholesale_data
+    get_mge_wholesale_data()
     from GriceWholesale.grice_wholesale_functionality import get_grice_wholesale_data
     get_grice_wholesale_data()
     from ChattanoogaShooting.chattanooga_shooting_functionality import get_chattanooga_shooting_data
@@ -322,3 +322,64 @@ def run_report_based_on_time():
         get_orion_wholesale_data()
         from Zanders.zanders_functionality import get_zanders_data
         get_zanders_data()
+
+
+# Google Storage Functions
+# Uploading files
+# bucket name should be "individual_reports"
+def upload_to_bucket(file_name, file_path, bucket_name):
+    # Setup
+    from google.cloud import storage
+    # TODO, may need to change below to the other environ
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
+    storage_client = storage.Client()
+    # Actual working part of function
+    try:
+        bucket = storage_client.get_bucket(bucket_name)
+        file = bucket.blob(file_name)
+        file.upload_from_filename(file_path)
+        print("I think it worked")
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
+# Downloading files
+# def download_file_from_bucket(file_name, file_path, bucket_name):
+#     # Setup
+#     from google.cloud import storage
+#     # TODO, may need to change below to the other environ
+#     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
+#     storage_client = storage.Client()
+#
+#     try:
+#         bucket = storage_client.get_bucket(bucket_name)
+#         file = bucket.blob(file_name)
+#         with open(file_path, 'wb') as f:
+#             storage_client.download_blob_to_file(file, f)
+#         return True
+#     except Exception as e:
+#         print(e)
+#         return False
+
+
+def download_file_from_bucket(file_name, file_path, bucket_name):
+    # Setup
+    from google.cloud import storage
+    # TODO, may need to change below to the other environ
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
+    storage_client = storage.Client()
+    try:
+        bucket = storage_client.get_bucket(bucket_name)
+        file = bucket.blob(file_name)
+        with open(file_path, 'wb') as f:
+            new_download = storage_client.download_blob_to_file(file, f)
+        return new_download
+    except Exception as e:
+        print(e)
+        return False
+
+
+# OLD FUNCTIONS
+

@@ -1,5 +1,5 @@
 import csv
-import os
+
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,13 +7,14 @@ from selenium.webdriver.chrome.service import Service
 import time, os
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions
-
+from functions import upload_to_bucket
 
 def get_chattanooga_shooting_data():
     # Setting up connection to driver and site
     URL = "https://chattanoogashooting.com/"
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
     driver = webdriver.Chrome(service=s)
+    import os
 
     EMAIL = os.getenv("EMAIL")
     PASSWORD = os.getenv("PASSWORD")
@@ -203,11 +204,36 @@ def get_chattanooga_shooting_data():
     time.sleep(2)
     driver.quit()
 
+    #New writing to google cloud below
+    import os
+    from google.cloud import storage
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
+    storage_client = storage.Client()
+
+    # Creating a new Bucket
+    bucket_name = 'individual_reports'
+    bucket = storage_client.bucket(bucket_name)
+
+    # Uploading files
+    def upload_to_bucket(file_name, file_path, bucket_name):
+        try:
+            bucket = storage_client.get_bucket(bucket_name)
+            file = bucket.blob(file_name)
+            file.upload_from_filename(file_path)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    # END
+
+
+
     # Writing to csv
     # Setting up the headers to write into the CSV
-    chattanooga_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\chattanooga_shooting_data_encoded.csv"
+    chattanooga_file = "\\Data\\WholesalerReports\\chattanooga_shooting_data_encoded.csv"
     # chattanooga_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\chattanooga_shooting_data.csv"
-    new_chattanooga_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\chattanooga_shooting_data.csv"
+    new_chattanooga_file = "\\Data\\WholesalerReports\\chattanooga_shooting_data.csv"
     headers = ["firearm_type", "price", "link", "stock_status"]
     with open(chattanooga_file, "w", newline="") as file:
         writer = csv.writer(file)

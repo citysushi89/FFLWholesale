@@ -22,14 +22,18 @@ def get_mge_wholesale_data():
 
     # LOGIN DATA: using environment variables
 
-    CUSTOMBER_NUMBER = os.getenv("CUSTOMER_NUMBER")
+    CUSTOMER_NUMBER = os.getenv("CUSTOMER_NUMBER")
+    if type(CUSTOMER_NUMBER) == "<class 'NoneType'>":
+        CUSTOMER_NUMBER = os.environ['CUSTOMER_NUMBER']
+
+
     PASSWORD = os.getenv("PASSWORD")
 
 
     # # Loading the webpage
     # driver = webdriver.Chrome(service=s)
     driver.get(URL)
-    time.sleep(.2)
+    time.sleep(2)
 
     # Filling in the email and passwords
     customer_number_field = driver.find_element(By.NAME, "cust_id")
@@ -46,7 +50,7 @@ def get_mge_wholesale_data():
 
     # Clicking on the Firearms Tab
     def click_firearms_tab():
-        time.sleep(.5)
+        time.sleep(1.5)
         shop_tab = driver.find_element(By.CLASS_NAME, "dropdown-toggle")
         a = ActionChains(driver)
         a.move_to_element(shop_tab).perform()
@@ -339,12 +343,12 @@ def get_mge_wholesale_data():
     # pages they have that they will always show how many are there), then using that as the stopping point
     # THIS ONLY WORKS WHEN THERE ARE EXACTLY 4 PAGES, IF IT INCREASES USE THE SYSTEM FOR PISTOLS,
     # IF IT DECREASES IT HAS TO CHANGE, LIKELY TO li[3] or less
-    last_page = driver.find_element(By.XPATH, "/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[4]/a")
+    last_page = driver.find_element(By.XPATH, "/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[6]/a")
     last_page_number = int(last_page.text)
     # print(f"The last page number is {last_page_number}")
 
     # Iterating through the pistol pages and getting the data
-    while iteration <= last_page_number :
+    while iteration < last_page_number + 1:
 
         # Getting Data from Rifle page
         firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
@@ -392,13 +396,17 @@ def get_mge_wholesale_data():
 
         # deciding which element to find and click as the next arrow
         if iteration == 1:
-            next_page = driver.find_element(By.XPATH, f"/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[5]/a")
+            try:
+                next_page = driver.find_element(By.XPATH, f"/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[5]/a")
+            except selenium.common.exceptions.NoSuchElementException:
+                next_page = driver.find_element(By.XPATH,"/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[7]/a")
+            next_page.click()
         elif iteration > 1:
             time.sleep(1)
             try:
                 time.sleep(.5)
                 next_page = driver.find_element(By.XPATH,
-                                                f"/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[6]/a")
+                                                f"/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[8]/a")
                 iteration += 1
                 time.sleep(.5)
                 next_page.click()
@@ -406,7 +414,7 @@ def get_mge_wholesale_data():
                 break
         iteration += 1
         time.sleep(.5)
-    time.sleep(.5)
+    time.sleep(2)
 
 
     # RIFLE FRAME
@@ -598,8 +606,67 @@ def get_mge_wholesale_data():
     master_list = [*new_derringer_list, *new_pistol_list, *new_pistol_frame_list, *new_revolver_list, *new_rifle_list,
                    *new_rifle_frame_list, *new_shotgun_list, *new_california_compliant_list]
 
-    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\mge_wholesale_data.csv", "w", newline="") as file:
+    # TODO: remove in products
+    filename = "/mge_wholesale_data.csv"
+    with open(rf"C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/WholesalerReports{filename}", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writeheader()
         writer.writerows(master_list)
 
+
+    # Writing to DB
+    import sqlite3
+
+    from flask import Flask
+    from flask_sqlalchemy import SQLAlchemy
+    import csv
+    app = Flask(__name__)
+    DB_NAME = "wholesaler_data.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_NAME}"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db = SQLAlchemy(app)
+
+
+    class ItemsTest(db.Model):
+        __tablename__ = "mge"
+        id = db.Column(db.Integer, primary_key=True, unique=True)
+        item = db.Column(db.String(500), unique=False)
+        price = db.Column(db.String(250), unique=False)
+        quantity = db.Column(db.String(250), unique=False)
+        link = db.Column(db.String(1000), unique=False)
+
+    db.create_all()
+    # Change path before deployment
+    # TODO: remove reading from CSV in production, just go straight from the dict/list to writing to db
+    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\mge_wholesale_data.csv") as file:
+        # reading the CSV file
+        csvFile = csv.reader(file)
+        headers = next(csvFile)
+        counter = 0
+        # accessing and deleting from the database
+        connection = sqlite3.connect(DB_NAME)
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM mge")
+        connection.commit()
+        connection.close()
+        # Creating a list to check against to avoid unique attribute failed error
+        items_in_db_already = []
+        # Writing to the database
+        for lines in csvFile:
+            if lines[0] in items_in_db_already:
+                continue
+            else:
+                items_in_db_already.append(lines[0])
+                new_entry = ItemsTest(
+                    item=lines[0],
+                    price=lines[1],
+                    quantity=lines[3],
+                    link=lines[2]
+                )
+                counter +=1
+                db.session.add(new_entry)
+        print(counter)
+        db.session.commit()
+
+
+get_mge_wholesale_data()

@@ -10,7 +10,7 @@ import selenium.common.exceptions
 import os
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
     convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links
-
+from functions import upload_to_bucket
 
 def get_second_amendment_wholesale_data():
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
@@ -126,8 +126,8 @@ def get_second_amendment_wholesale_data():
             break
 
     # Setting up the headers to write into the CSV
-    second_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\second_amendment_wholesale_data_encoded.csv"
-    new_second_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\second_amendment_wholesale_data.csv"
+    second_file = "\\Data\\WholesalerReports\\second_amendment_wholesale_data_encoded.csv"
+    new_second_file = "\\Data\\WholesalerReports\\second_amendment_wholesale_data.csv"
     headers = ["firearm_type", "price", "link", "stock_status"]
     with open(second_file, "w", newline="") as file:
         writer = csv.writer(file)

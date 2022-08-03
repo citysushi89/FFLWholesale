@@ -1,7 +1,8 @@
 import os
 import chardet
-from flask import Flask, render_template, url_for, redirect, request, flash, session
-from forms import WholesaleSelectorForm, RegisterForm, LoginForm, HomePageActionSelector, RunReportSelector, wholesalers_list
+from flask import Flask, render_template, url_for, redirect, request, flash, session, send_file, send_from_directory
+from forms import WholesaleSelectorForm, RegisterForm, LoginForm, HomePageActionSelector, RunReportSelector, \
+    wholesalers_list, RunReportDownload
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import SelectMultipleField, StringField, widgets, SubmitField, validators, FieldList, FormField, Form
@@ -9,24 +10,18 @@ import sys
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user, login_required
 from flask_bootstrap import Bootstrap
-from datetime import datetime
-from functions import run_report_based_on_time, run_report_for_testing_purposes, combine_user_csvs
+from functions import run_report_based_on_time, run_report_for_testing_purposes, combine_user_csvs, \
+    download_file_from_bucket
 # Below imports a module that outputs more info in Heroku logs
 import logging
-
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 
-# Backend functionality
-# TODO: MGE - spitting "Our Price $xxx" and "Sale Price $xxx" into the same field in the CSV
-
-# UI/Front End Functionality:
-# TODO 2: Homepage
-    # TODO 2.1: extend footer to other html files
-
-
-SECRET_KEY = os.getenv("SECRET_KEY")
+try:
+    SECRET_KEY = os.getenv("SECRET_KEY")
+except:
+    SECRET_KEY = os.environ["SECRET_KEY"]
 app.config["SECRET_KEY"] = SECRET_KEY
 
 # CONNECT TO DB - Production
@@ -72,7 +67,6 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     company = db.Column(db.String(100))
 
-# TODO, update: when adding new wholesalers, need to update wholesaler login info on /wholesaleloginpage when
 # Creating the Database of the login info
 class WholesalerLoginInfo(db.Model):
     __tablename__ = "wholesaler_login_info"
@@ -85,19 +79,6 @@ class WholesalerLoginInfo(db.Model):
     wholesaler_username = db.Column(db.String(250), nullable=False)
     wholesaler_password = db.Column(db.String(250), nullable=False)
 
-
-class UserReportSelections(db.Model):
-    __tablename__ = "user_report_selections"
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Creates the foreign key, "users.id" the users refers to the tablename of User
-    # TODO Before Launch, currently allows unlimited user_ids (foreign keys) inputted,
-    #  need to reduce to one for base plan (tried unique key like email field in other db and didn't work)
-    customer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-
-    time_selected = db.Column(db.String(250), nullable=False)
-    days_selected = db.Column(db.String(500), nullable=False)
-    wholesalers_selected = db.Column(db.String(1000), nullable=False)
 
 # Need these lines so that user_wholesalers can go from the route '/' to the form WholesalerLoginForm in forms.py
 global grice_wholesale_username, grice_wholesale_password, mge_wholesale_username, mge_wholesale_password
@@ -196,95 +177,105 @@ def wholesale_login_page():
 # Marking with decorator that checks if they are a current user
 @login_required
 def run_report():
-    # TODO: Most of this functionality should be obselete once report to run regularly is set up
-    form = RunReportSelector()
+    import sqlite3
+    # OLD BROKEN IN HEROKU EMAIL FORM
+    # form = RunReportSelector()
+    # NEW FORM TO JUST DOWNLOAD
+    form = RunReportDownload()
 
-    if request.form.get("run_report_now") == "Email me the report now":
+    # NEW aug 2
+    connection = sqlite3.connect("wholesaler_data.db")
+    cursor = connection.cursor()
+    print("Connected to the database")
+
+    # Get data from table "mge"
+    cursor.execute("SELECT * FROM mge")
+    answer = cursor.fetchall()
+    number_of_rows_in_answer = len(answer)
+    print(number_of_rows_in_answer)
+    # End New
+
+
+    if request.form.get("download_report") == "Download Report":
         user_selected_wholesalers_for_report = []
         user_selected_wholesalers_for_report_string = ""
         for item in form.user_wholesalers_selected_by_check_boxes.data:
             user_selected_wholesalers_for_report.append(item)
             user_selected_wholesalers_for_report_string += item + ", "
-        flash(f"You have selected: {user_selected_wholesalers_for_report_string} for your report. Please allow 5 minutes for the request to be processed and sent.")
-        # Combining selected CSVs
-        from functions import combine_user_csvs, send_email
-        combine_user_csvs(user_selected_wholesalers_for_report)
-        # Need to get user email to pass into send_email
-        import sqlite3
-        import re
-        connection = sqlite3.connect("userdata.db")
-        cursor = connection.cursor()
-        this_user = str(current_user)
-        result = re.findall(r'\d+', this_user)
-        cursor.execute(f"SELECT * FROM users WHERE id == {result[0]}")
-        results_from_db = cursor.fetchall()
-        user_email = results_from_db[0][1]
-        # Need to use try, except because reports only run for 6am-10pm send times
-        # TODO later, need to use the actual user number to save and store and send file
-        try:
-            # Need to get the date to find the right document
-            now = datetime.now()
-            todays_date = now.strftime("%I%p_%d%b%y")
-            filename = open(r"C:/Users/OwenDocuments/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/Users/1/wholesaler_data.csv", encoding="utf-8")
-            send_email(filename, user_email)
-        except FileNotFoundError:
-            # Need to get the date to find the right document
-            now = datetime.now()
-            # picking the 10pm one so that it is the most up to date document as this will occur at night
-            todays_date = now.strftime("10PM_%d%b%y")
-            send_email(r"C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/fflwholesalerproductpps/Data/Users/1/wholesaler_data.csv", user_email)
+        flash(f"You have selected: {user_selected_wholesalers_for_report_string} for your report, it will download shortly.")
+        # Accessing the google cloud
+        # TODO, may need to change below to the other environ
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
 
-    elif request.form.get("run_recurring_report") == "Set up recurring email report":
-        time_user_selected = form.time_question.data
-                # Adding to a list and a string of user selected wholesalers
-        # Need the list for Python, need the string to input into the database
-        user_selected_wholesalers_for_report = []
-        user_selected_wholesalers_for_report_string = ""
-        for item in form.user_wholesalers_selected_by_check_boxes.data:
-            user_selected_wholesalers_for_report.append(item)
-            user_selected_wholesalers_for_report_string += item + ", "
-        flash(f"You have selected: {user_selected_wholesalers_for_report_string} for your report. "
-              f"You will be emailed daily at {time_user_selected} with the most up-to-date wholesaler information.")
-        # Combining selected CSVs
-        from functions import combine_user_csvs
-        combine_user_csvs(user_selected_wholesalers_for_report)
-        # NEW 14June - Trying to actually add info to db
+        # Getting the date the report is saved to files do not overlap
+        from datetime import datetime
+        now = datetime.now()
+        date_report_saved = now.strftime("%d%b%y")
+
+        # TODO before upload: make users in filenaming convention the actual user (uncomment 2 below lines and delete the third)
+        # from functions import get_current_user
+        # this_user = get_current_user()
+        user_number = 1
+        # user_reports needs to stay, it will keep the user reports in a folder with folders for individual users
+        file_name = f"user_reports/{user_number}/wholesaler_data{date_report_saved}.csv"
+        destination_blob_name = f"user_reports/{user_number}/wholesaler_data{date_report_saved}.csv"
+
+        list_of_report_data = []
+        # Appending the list of report data based on user input
+        for item in user_selected_wholesalers_for_report:
+            if item == "Grice Wholesale":
+                grice_filename = "wholesale_reports/grice_wholesale_data.csv"
+                list_of_report_data.append(grice_filename)
+            elif item == "MGE Wholesale":
+                # connecting to the database
+                connection = sqlite3.connect("wholesaler_data.db")
+                cursor = connection.cursor()
+                print("Connected to the database")
+
+                # Get data from table "mge"
+                cursor.execute("SELECT * FROM mge")
+                answer = cursor.fetchall()
+
+                mge_filename = "wholesale_reports/mge_wholesale_data.csv"
+                list_of_report_data.append(mge_filename)
+            elif item == "Chattanooga Shooting":
+                chattanooga_filename = "wholesale_reports/chattanooga_shooting_data.csv"
+                list_of_report_data.append(chattanooga_filename)
+            elif item == "Second Amendment Wholesale":
+                second_filename = "wholesale_reports/second_amendment_wholesale_data.csv"
+                list_of_report_data.append(second_filename)
+            elif item == "Orion Wholesale":
+                orion_filename = "wholesale_reports/orion_wholesale_data.csv"
+                list_of_report_data.append(orion_filename)
+            elif item == "Zanders":
+                zanders_filename = "wholesale_reports/zanders_data.csv"
+                list_of_report_data.append(zanders_filename)
+            # For the select all function
+            elif item == "Select All":
+                grice_filename = "wholesale_reports/grice_wholesale_data.csv"
+                list_of_report_data.append(grice_filename)
+
+                mge_filename = "wholesale_reports/mge_wholesale_data.csv"
+                list_of_report_data.append(mge_filename)
+
+                chattanooga_filename = "wholesale_reports/chattanooga_shooting_data.csv"
+                list_of_report_data.append(chattanooga_filename)
+
+                second_filename = "wholesale_reports/second_amendment_wholesale_data.csv"
+                list_of_report_data.append(second_filename)
+
+                orion_filename = "wholesale_reports/orion_wholesale_data.csv"
+                list_of_report_data.append(orion_filename)
+
+                zanders_filename = "wholesale_reports/zanders_data.csv"
+                list_of_report_data.append(zanders_filename)
 
 
-        # Adding data to the database
-        # TODO Before Launch, currently allows unlimited user_ids (foreign keys) inputted,
-        #  need to reduce to one for base plan
-        new_user_recurring_preferences = UserReportSelections(
-            customer_id=current_user.id,
-            time_selected=form.time_question.data,
-            # Days selected will be every day, will eventually add premium tier for certain days/times
-            days_selected="Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday",
-            wholesalers_selected=user_selected_wholesalers_for_report_string
-        )
-        db.session.add(new_user_recurring_preferences)
-        db.session.commit()
-        # TODO: Need to take inputs and add them to the database class UserReportSelections(db.Model):
-
-    # Below searches list user_inputted, and filters through the list of individual wholeasler CSVs to compile
-    # to a customer report for the user
-    # import pandas as pd
-    # # TODO, UPDATE: as new wholesalers are added, need to be included below
-    # LIST_OF_WHOLESALE_CSVS = ["ChattanoogaShooting/chattanooga_shooting_data.csv",
-    #         "SecondAmendmentWholesale/second_amendment_wholesale_data.csv",
-    #         "MGEWholesale/mge_wholesale_data.csv",
-    #         "GriceWholesale/grice_wholesale_data.csv",
-    #         ]
-    # list_specific_to_user_to_compile_csv_with = []
-    #
-    # for item in user_selected_wholesalers_for_report:
-    #     if item in LIST_OF_WHOLESALE_CSVS:
-    #         list_specific_to_user_to_compile_csv_with.append(item)
-    #
-    # for item in list_specific_to_user_to_compile_csv_with:
-    #     data = pd.read_csv(item, encoding_errors='replace')
-    #     data.to_csv("all_wholesaler_data.csv", index=False, header=False, mode="a")
-
-    return render_template("runreport.html", form=form, logged_in=current_user.is_authenticated)
+    return render_template("runreport.html",
+                           form=form,
+                           logged_in=current_user.is_authenticated,
+                           answer=answer,
+                           count=number_of_rows_in_answer)
 
 
 # Page to register a new user
@@ -333,6 +324,12 @@ def contact():
 def logout():
     logout_user()
     return redirect(url_for("home_page_selections"))
+
+# @app.route('/download')
+# def download_report():
+#         return send_file(new_download, attachment_filename="Wholesaler Report.csv")
+#
+#     return render_template("runreport.html", form=form, logged_in=current_user.is_authenticated)
 
 
 # Needs to go at the bottom!

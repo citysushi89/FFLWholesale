@@ -1,15 +1,27 @@
+TODO: STATUS Aug 2, 2022: Run report page reading and displaying mge table from wholesaler_data.db,
+TODO: need to figure out how to send this to the customer ... email, download, or display in browser?
+TODO: display in browser to start?
+
 Currently:
 Report needs to be run manually once launched, not automated
 
 Things to be automatic eventually:
-1) check_to_see_if_email_needs_to_be_sent(), 2) run_report_based_on_time()
-Use Python Anywhere? <-- was a big pain
+2) check_to_see_if_email_needs_to_be_sent(), 1) run_report_based_on_time()
+Use Python Anywhere? <-- was a big pain (likely due to trying to save data locally)
+
+Before Launch:
+# TODO currently: mge can write to SQL database, decide how to write others...
+# TODO currently: (use tables in one DB, try to convert to Postgres?)
+# TODO: MGE - spitting "Our Price $xxx" and "Sale Price $xxx" into the same field in the CSV
+# TODO: Change various functionality pages to include writing to the google cloud OR a db
+# TODO: create a try except framework in writing to each functionality, should make it friendly to running local and nonlocal
 
 After Launch:
     Necessary "real launch" base features:
     1) need to verify FFL status? to not get in trouble, to confirm that they should get access to pricing
         1.1) With that, should I approve new sign ups in this stage?
-    2)check password hash and salting -- and include stricter password requirements
+    2) check password hash and salting, may need a notification (or a "flash") on registration page if password length
+    is too short per the requirements
     3) Need to get email for "Wholesale Helper" and use that in the sending of the reports
     4) Extend footer to other pages
 
@@ -18,5 +30,5 @@ After Launch:
     # 2: Add ability, maybe in a higher tier, to just get in-stock items in the report
     # 3: Later: make a way for the user to filter the data on the site
 
-Wholesalers still to add: Lipsey's (waiting on account confirmation)
+Wholesalers still to add: Lipsey's (getting emails, will need to find a way to automate putting into database)
 

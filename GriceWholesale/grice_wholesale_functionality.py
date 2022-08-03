@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 import csv
 import os
 global master_list
-
+from functions import upload_to_bucket
 
 def get_grice_wholesale_data():
     from flask_login import current_user
@@ -16,8 +16,13 @@ def get_grice_wholesale_data():
     chrome_driver_path = "C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver"
 
     # Getting login info using environment variables
+    # if framework is for if running locally
     EMAIL = os.getenv("EMAIL_SECOND")
+    if type(EMAIL) == "None":
+        EMAIL = os.environ["EMAIL_SECOND"]
+
     PASSWORD = os.getenv("PASSWORD")
+
 
     driver = webdriver.Chrome(service=s)
     driver.get(URL)
@@ -25,7 +30,9 @@ def get_grice_wholesale_data():
     time.sleep(1)
 
     # Filling in the email and passwords
-    email_field = driver.find_element(By.NAME, "login[username]")
+    time.sleep(3)
+    email_field = driver.find_element(By.ID, "email")
+    time.sleep(1)
     email_field.send_keys(EMAIL)
     time.sleep(1)
     password_field = driver.find_element(By.NAME, "login[password]")
@@ -182,15 +189,5 @@ def get_grice_wholesale_data():
                 driver.quit()
 
 
-    # Converting the dicts of dicts to a list of dicts
-    master_list = [value for value in master_dict.values()]
 
-    # Preping to Write
-    headers = list_categories
-
-    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\grice_wholesale_data.csv", "w", newline="") as file:
-        csv_writer = csv.DictWriter(file, fieldnames=headers)
-        csv_writer.writeheader()
-        csv_writer.writerows(master_list)
-
-
+get_grice_wholesale_data()

@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 import selenium.webdriver.common.keys
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions
+from functions import upload_to_bucket
 
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
     convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links
@@ -244,8 +245,8 @@ def get_orion_wholesale_data():
 
     # Setting up the headers to write into the CSV
     headers = ["firearm_type", "price", "link", "stock_status"]
-    orion_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\orion_wholesale_data_encoded.csv"
-    new_orion_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\orion_wholesale_data.csv"
+    orion_file = "\\Data\\WholesalerReports\\orion_wholesale_data_encoded.csv"
+    new_orion_file = "\\Data\\WholesalerReports\\orion_wholesale_data.csv"
     with open(orion_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
