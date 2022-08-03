@@ -67,6 +67,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     company = db.Column(db.String(100))
 
+
 # Creating the Database of the login info
 class WholesalerLoginInfo(db.Model):
     __tablename__ = "wholesaler_login_info"
@@ -78,6 +79,16 @@ class WholesalerLoginInfo(db.Model):
     wholesaler_name = db.Column(db.String(250), nullable=False)
     wholesaler_username = db.Column(db.String(250), nullable=False)
     wholesaler_password = db.Column(db.String(250), nullable=False)
+
+
+class ItemsTest(db.Model):
+    __tablename__ = "mge"
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    item = db.Column(db.String(500), unique=False)
+    price = db.Column(db.String(250), unique=False)
+    quantity = db.Column(db.String(250), unique=False)
+    link = db.Column(db.String(1000), unique=False)
+
 
 
 # Need these lines so that user_wholesalers can go from the route '/' to the form WholesalerLoginForm in forms.py
@@ -184,7 +195,7 @@ def run_report():
     form = RunReportDownload()
 
     # NEW aug 2
-    connection = sqlite3.connect("wholesaler_data.db")
+    connection = sqlite3.connect("userdata.db")
     cursor = connection.cursor()
     print("Connected to the database")
 
@@ -228,7 +239,7 @@ def run_report():
                 list_of_report_data.append(grice_filename)
             elif item == "MGE Wholesale":
                 # connecting to the database
-                connection = sqlite3.connect("wholesaler_data.db")
+                connection = sqlite3.connect("userdata.db")
                 cursor = connection.cursor()
                 print("Connected to the database")
 

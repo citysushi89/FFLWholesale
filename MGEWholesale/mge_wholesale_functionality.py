@@ -613,7 +613,7 @@ def get_mge_wholesale_data():
         writer.writeheader()
         writer.writerows(master_list)
 
-
+    # TODO need to adjust to write to table in userdata.db
     # Writing to DB
     import sqlite3
 
@@ -621,7 +621,7 @@ def get_mge_wholesale_data():
     from flask_sqlalchemy import SQLAlchemy
     import csv
     app = Flask(__name__)
-    DB_NAME = "wholesaler_data.db"
+    DB_NAME = "userdata.db"
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_NAME}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db = SQLAlchemy(app)
