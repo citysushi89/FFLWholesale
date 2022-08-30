@@ -9,8 +9,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions
 import os
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
-    convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links
-from functions import upload_to_bucket
+    convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links, clean_firearm_type, clean_stock_grice
+
 
 def get_second_amendment_wholesale_data():
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
@@ -72,7 +72,8 @@ def get_second_amendment_wholesale_data():
                 new_item = item_text.replace("™", "")
                 firearm_type_list.remove(item_text)
                 firearm_type_list.insert(item_index, new_item)
-
+        # clean firearm type
+        brand_list, model_list = clean_firearm_type(firearm_type_list)
 
         # Gets Cost
         cost = driver.find_elements(By.CLASS_NAME, "price-box")
@@ -88,6 +89,7 @@ def get_second_amendment_wholesale_data():
         # for i in range(1, number_of_items_on_page + 1):
         stock_status = driver.find_elements(By.CLASS_NAME, "actions-primary")
         stock_status_list = convert_selenium_objects_to_list(input_list=stock_status)
+        clean_stock_status_list = clean_stock_grice(stock_status_list)
 
         time.sleep(1)
         # Going to the bottom of the page and clicking the next page button
@@ -105,10 +107,13 @@ def get_second_amendment_wholesale_data():
         # Organizing all into one list in order: 0) type 1) cost 2) link 3) Stock Status
         for i in range(0, length_of_a_list):
             place_holder_list = []
-            place_holder_list.append(firearm_type_list[i])
+            # TODO Add brand, model and vendor
+            place_holder_list.append(brand_list[i])
+            place_holder_list.append(model_list[i])
             place_holder_list.append(cost_list[i])
             place_holder_list.append(link_list[i])
-            place_holder_list.append(stock_status_list[i])
+            place_holder_list.append(clean_stock_status_list[i])
+            place_holder_list.append('Second Amendment Wholesale')
             master_list.append(place_holder_list)
 
         # Checking again how many items are shown - NEEDS TO BE LAST THING BEFORE NEXT PAGE CLICK
@@ -126,9 +131,9 @@ def get_second_amendment_wholesale_data():
             break
 
     # Setting up the headers to write into the CSV
-    second_file = "\\Data\\WholesalerReports\\second_amendment_wholesale_data_encoded.csv"
-    new_second_file = "\\Data\\WholesalerReports\\second_amendment_wholesale_data.csv"
-    headers = ["firearm_type", "price", "link", "stock_status"]
+    second_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\second_amendment_wholesale_data_encoded.csv"
+    new_second_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\second_amendment_wholesale_data.csv"
+    headers = ["brand", "model", "price", "link", "stock_status", "vendor"]
     with open(second_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
@@ -145,3 +150,10 @@ def get_second_amendment_wholesale_data():
                 pass
     os.remove(second_file)
 
+get_second_amendment_wholesale_data()
+
+
+# TODO
+# clean stock status
+# Add vendor
+# separate brand and model - use first space

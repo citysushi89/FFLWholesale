@@ -175,7 +175,8 @@ def send_email(filename, to_address):
 
 # Converts current_user from "<User 1>" to "1"
 def get_just_user_decimal():
-    from main import current_user
+    # from main import current_user
+    current_user = 1
     string_current_user = str(current_user)
     current_user_list = []
     for item in string_current_user:
@@ -323,63 +324,69 @@ def run_report_based_on_time():
         from Zanders.zanders_functionality import get_zanders_data
         get_zanders_data()
 
+# Functions Aug 23, 2022 and later
 
-# Google Storage Functions
-# Uploading files
-# bucket name should be "individual_reports"
-def upload_to_bucket(file_name, file_path, bucket_name):
-    # Setup
-    from google.cloud import storage
-    # TODO, may need to change below to the other environ
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
-    storage_client = storage.Client()
-    # Actual working part of function
-    try:
-        bucket = storage_client.get_bucket(bucket_name)
-        file = bucket.blob(file_name)
-        file.upload_from_filename(file_path)
-        print("I think it worked")
-        return True
-    except Exception as e:
-        print(e)
-        return False
+def clean_price(price_list):
+    output_list = []
+    for item in price_list:
+        new_item = ''
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        output_list.append(new_item)
+    return output_list
 
+def clean_firearm_type(input_list):
+    brand_list = []
+    model_list = []
+    for item in input_list:
+        brand, model = item.split(' ', 1)
+        # Below was not working to filter out orion brands when they sometimes started with a 'd'
+        # if brand.startswith('d'):
+        #     brand.replace('d', '', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+    return brand_list, model_list
 
-# Downloading files
-# def download_file_from_bucket(file_name, file_path, bucket_name):
-#     # Setup
-#     from google.cloud import storage
-#     # TODO, may need to change below to the other environ
-#     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
-#     storage_client = storage.Client()
-#
-#     try:
-#         bucket = storage_client.get_bucket(bucket_name)
-#         file = bucket.blob(file_name)
-#         with open(file_path, 'wb') as f:
-#             storage_client.download_blob_to_file(file, f)
-#         return True
-#     except Exception as e:
-#         print(e)
-#         return False
+def clean_stock_grice(stock_list):
+    output_list = []
+    new_item = ''
+    for item in stock_list:
+        if item == "ADD TO CART" or item == "Add to Cart":
+            output_list.append("In Stock")
+        elif item == "OUT OF STOCK":
+            output_list.append("Out of Stock")
+        elif item == "BACK ORDER":
+            output_list.append("Back Order")
+        else:
+            output_list.append("N/A")
+    return output_list
 
-
-def download_file_from_bucket(file_name, file_path, bucket_name):
-    # Setup
-    from google.cloud import storage
-    # TODO, may need to change below to the other environ
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
-    storage_client = storage.Client()
-    try:
-        bucket = storage_client.get_bucket(bucket_name)
-        file = bucket.blob(file_name)
-        with open(file_path, 'wb') as f:
-            new_download = storage_client.download_blob_to_file(file, f)
-        return new_download
-    except Exception as e:
-        print(e)
-        return False
+def clean_firearm_type_grice(input_list):
+    brand_list = []
+    model_list = []
+    for item in input_list:
+        brand, model = item.split('-', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+    return brand_list, model_list
 
 
-# OLD FUNCTIONS
-
+def clean_stock_status_orion(input_list):
+    output_list = []
+    for item in input_list:
+        new_item = ''
+        if item.startswith('A'):
+            for letter in item:
+                if letter.isdigit() or letter == '+':
+                    new_item += letter
+        elif item.startswith("O"):
+            new_item = 'OUT OF STOCK'
+        elif item.startswith("In"):
+            for letter in item:
+                if letter.isdigit() or letter == '+':
+                    new_item += letter
+        else:
+            new_item = 'N/A'
+        output_list.append(new_item)
+    return output_list

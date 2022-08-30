@@ -9,10 +9,8 @@ from selenium.webdriver.common.keys import Keys
 import selenium.webdriver.common.keys
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions
-from functions import upload_to_bucket
-
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
-    convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links
+    convert_selenium_objects_to_list, clean_price, clean_stock_status_orion, clean_firearm_type
 
 
 def get_orion_wholesale_data():
@@ -74,14 +72,20 @@ def get_orion_wholesale_data():
             firearm_type = driver.find_elements(By.CLASS_NAME, "Name")
             firearm_type_list = convert_selenium_objects_to_list(input_list=firearm_type)
 
+        # Clean firearm Type
+        brand_list, model_list = clean_firearm_type(firearm_type_list)
+
         # Gets Cost
         cost = driver.find_elements(By.CLASS_NAME, "variant-price")
         try:
             cost_list = convert_selenium_objects_to_list(input_list=cost)
+            clean_cost_list = clean_price(cost_list)
         except selenium.common.exceptions.StaleElementReferenceException:
             time.sleep(5)
             cost_list = convert_selenium_objects_to_list(input_list=cost)
-
+            clean_cost_list = clean_price(cost_list)
+        print(clean_cost_list)
+        print(len(clean_cost_list))
         # Gets link
         link_list = []
         for i in range(1, len(firearm_type_list) + 1):
@@ -105,16 +109,24 @@ def get_orion_wholesale_data():
         for i in range(0, len(stock_status_list), 2):
             new_stock_status = stock_status_list[i] + " " + stock_status_list[i + 1]
             new_stock_status_list.append(new_stock_status)
+        # Remove text from in stock items, replace with uniform out of stock for out of stock items
+        clean_stock_status_list = clean_stock_status_orion(new_stock_status_list)
+
 
         # Compiling into a master list:
         time.sleep(1)
         length_of_a_list = len(firearm_type_list)
         for i in range(0, length_of_a_list):
             place_holder_list = []
-            place_holder_list.append(firearm_type_list[i])
-            place_holder_list.append(cost_list[i])
+            # TODO replace here brand
+            place_holder_list.append(brand_list[i])
+            place_holder_list.append(model_list[i])
+            place_holder_list.append(clean_cost_list[i])
+            # place_holder_list.append(cost_list[i])
             place_holder_list.append(link_list[i])
-            place_holder_list.append(new_stock_status_list[i])
+            place_holder_list.append(clean_stock_status_list[i])
+            # place_holder_list.append(new_stock_status_list[i])
+            place_holder_list.append("Orion")
             master_list_handguns.append(place_holder_list)
         print(f"hg: {master_list_handguns}")
         print(len(master_list_handguns))
@@ -178,13 +190,18 @@ def get_orion_wholesale_data():
             firearm_type = driver.find_elements(By.CLASS_NAME, "Name")
             firearm_type_list = convert_selenium_objects_to_list(input_list=firearm_type)
 
+        # Clean firearm Type
+        brand_list, model_list = clean_firearm_type(firearm_type_list)
+
         # Gets Cost
         cost = driver.find_elements(By.CLASS_NAME, "variant-price")
         try:
             cost_list = convert_selenium_objects_to_list(input_list=cost)
+            clean_cost_list = clean_price(cost_list)
         except selenium.common.exceptions.StaleElementReferenceException:
             time.sleep(5)
             cost_list = convert_selenium_objects_to_list(input_list=cost)
+            clean_cost_list = clean_price(cost_list)
 
         # Gets link
         link_list = []
@@ -207,16 +224,23 @@ def get_orion_wholesale_data():
         for i in range(0, len(stock_status_list), 2):
             new_stock_status = stock_status_list[i] + " " + stock_status_list[i + 1]
             new_stock_status_list.append(new_stock_status)
+        # Remove text from in stock items, replace with uniform out of stock for out of stock items
+        clean_stock_status_list = clean_stock_status_orion(new_stock_status_list)
 
         # Compiling into a master list:
         time.sleep(1)
         length_of_a_list = len(firearm_type_list)
         for i in range(0, length_of_a_list):
             place_holder_list = []
-            place_holder_list.append(firearm_type_list[i])
-            place_holder_list.append(cost_list[i])
+            # TODO replace here brand
+            place_holder_list.append(brand_list[i])
+            place_holder_list.append(model_list[i])
+            place_holder_list.append(clean_cost_list[i])
+            # place_holder_list.append(cost_list[i])
             place_holder_list.append(link_list[i])
-            place_holder_list.append(new_stock_status_list[i])
+            place_holder_list.append(clean_stock_status_list[i])
+            # place_holder_list.append(new_stock_status_list[i])
+            place_holder_list.append("Orion")
             master_list_long_guns.append(place_holder_list)
         # Below is necessary because the next page arrow moves based on what page you are on
         time.sleep(2)
@@ -244,9 +268,9 @@ def get_orion_wholesale_data():
 
 
     # Setting up the headers to write into the CSV
-    headers = ["firearm_type", "price", "link", "stock_status"]
-    orion_file = "\\Data\\WholesalerReports\\orion_wholesale_data_encoded.csv"
-    new_orion_file = "\\Data\\WholesalerReports\\orion_wholesale_data.csv"
+    headers = ["brand", "model", "price", "link", "stock_status", "vendor"]
+    orion_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\orion_wholesale_data.csvencoded.csv"
+    new_orion_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\orion_wholesale_data.csv"
     with open(orion_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
@@ -257,3 +281,6 @@ def get_orion_wholesale_data():
         for line in inp:
             output_file_orion.write(line)
     os.remove(orion_file)
+
+
+get_orion_wholesale_data()

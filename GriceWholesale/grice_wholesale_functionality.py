@@ -6,9 +6,10 @@ from selenium.webdriver.chrome.service import Service
 import csv
 import os
 global master_list
-from functions import upload_to_bucket
+from functions import clean_stock_grice, clean_firearm_type_grice
 
 def get_grice_wholesale_data():
+
     from flask_login import current_user
     URL = "https://gricewholesale.com/customer/account/login/"
     # Loading the webpage
@@ -20,6 +21,7 @@ def get_grice_wholesale_data():
     EMAIL = os.getenv("EMAIL_SECOND")
     if type(EMAIL) == "None":
         EMAIL = os.environ["EMAIL_SECOND"]
+
 
     PASSWORD = os.getenv("PASSWORD")
 
@@ -189,5 +191,6 @@ def get_grice_wholesale_data():
                 driver.quit()
 
 
+    print(master_list)
 
 get_grice_wholesale_data()

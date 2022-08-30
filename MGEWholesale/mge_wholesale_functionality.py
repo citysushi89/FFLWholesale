@@ -1,5 +1,5 @@
 import selenium.common.exceptions
-
+from functions import clean_price
 
 def get_mge_wholesale_data():
     from selenium import webdriver
@@ -13,16 +13,18 @@ def get_mge_wholesale_data():
     # installing the drivers
     # driver = webdriver.Chrome(ChromeDriverManager().install())
 
-    ### ALL FOR MGE Wholesale ###
     # Setting up the details for the login page
-    # SILENCED SERVICE CODE BEFORE FOR PYTHON ANYWHERE
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
     driver = webdriver.Chrome(service=s)
     URL = "https://www.mgewholesale.com/ecommerce/account/login.cfm"
 
     # LOGIN DATA: using environment variables
 
+    # TODO remove this framework and just use env variables later
+    # try:
     CUSTOMER_NUMBER = os.getenv("CUSTOMER_NUMBER")
+    # except:
+
     if type(CUSTOMER_NUMBER) == "<class 'NoneType'>":
         CUSTOMER_NUMBER = os.environ['CUSTOMER_NUMBER']
 
@@ -69,6 +71,7 @@ def get_mge_wholesale_data():
     # Getting data from the firearms on the firearms home page
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -77,24 +80,58 @@ def get_mge_wholesale_data():
     time.sleep(.5)
 
     # Organizing List of Dictionaries Dictionary of Details, Price, and Links
-
     links_to_firearms = []
     for links in link_to_firearm_unorganized:
         new_link = links.find_element(By.TAG_NAME, "a")
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Categories in all lists
-    list_categories = ["firearm_type", "price", "link", "stock_status"]
+    list_categories = ["brand", "model", "price", "link", "stock_status", "vendor"]
 
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         firearm_home_page_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
 
@@ -111,6 +148,7 @@ def get_mge_wholesale_data():
     # Getting Data from Derringer page
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -126,18 +164,53 @@ def get_mge_wholesale_data():
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         derringer_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
 
-    # print(derringer_list)
     time.sleep(.5)
 
 
@@ -161,7 +234,6 @@ def get_mge_wholesale_data():
     # pages they have that they will always show how many are there), then using that as the stopping point
     last_page = driver.find_element(By.XPATH, "/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[6]/a")
     last_page_number = int(last_page.text) + 1
-    # print(f"The last page number is {last_page_number}")
 
     # Iterating through the pistol pages and getting the data
     while iteration < last_page_number:
@@ -180,6 +252,7 @@ def get_mge_wholesale_data():
         # 1 time each for a single firearm leads to
         # an error when compiling the dictionary later on List looked like: "Our Price 499$" "our Price 500\nSale Price 525"
         cost_pistol_text = [item.text for item in cost_pistol]
+
 
         time.sleep(1)
         cost_pistol_text_fixed = []
@@ -205,13 +278,57 @@ def get_mge_wholesale_data():
             new_link_text = new_link.get_attribute("href")
             links_to_firearms.append(new_link_text)
 
+        # Cleaning Price verbiage
+        price_list = []
+        new_item = ''
+        print(cost_pistol_text)
+        print(cost_pistol_text_fixed)
+        for item in cost_pistol_text_fixed:
+            for letter in item:
+                # print(letter)
+                if letter.isdigit() or letter == '$' or letter == '.':
+                    new_item += letter
+                    print(new_item)
+            price_list.append(new_item)
+            new_item = ''
+        print(price_list)
+
+
+        # Cleaning stock status verbiage
+        stock_status_list = []
+        for item in stock_status_unorganized:
+            text = item.text
+            new_item = ''
+            for item in text:
+                if item.isdigit():
+                    new_item += item
+            if new_item:
+                stock_status_list.append(new_item)
+            else:
+                stock_status_list.append('Out of Stock')
+
+        # Separating the model and brand
+        brand_list = []
+        model_list = []
+        for item in firearm_type:
+            text = item.text
+            try:
+                brand, model = text.split(' ', 1)
+            except ValueError:
+                brand = "N/A"
+                model = text
+            brand_list.append(brand)
+            model_list.append(model)
+
         # Actually organizing the data into a dictionary
         for n in range(len(firearm_type)):
             pistol_list[n + (previous_run_throughs * ITEMS_PER_PAGE)] = {
-                "firearm_type": firearm_type[n].text,
-                "price": cost_pistol_text_fixed[n],
+                "brand": brand_list[n],
+                "model": model_list[n],
+                "price": price_list[n],
                 "link": links_to_firearms[n],
-                "stock_status": stock_status_unorganized[n].text,
+                "stock_status": stock_status_list[n],
+                "vendor": "MGE Wholesale"
             }
             previous_run_throughs += 1
         time.sleep(1)
@@ -253,6 +370,7 @@ def get_mge_wholesale_data():
     # Getting Data from PISTOL FRAME page
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -268,19 +386,51 @@ def get_mge_wholesale_data():
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         pistol_frame_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
-
-    # print(pistol_frame_list)
-
 
     # REVOLVER
     # Moving from pistol frame to revolver page
@@ -297,6 +447,7 @@ def get_mge_wholesale_data():
     # Getting Data from Revolver page
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -312,18 +463,52 @@ def get_mge_wholesale_data():
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         revolver_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
-
-    # print(revolver_list)
 
     # RIFLE
     # Moving from Revolver to Rifle
@@ -345,7 +530,6 @@ def get_mge_wholesale_data():
     # IF IT DECREASES IT HAS TO CHANGE, LIKELY TO li[3] or less
     last_page = driver.find_element(By.XPATH, "/html/body/div[2]/div[7]/div/div[2]/div[2]/div[1]/div/ul/li[6]/a")
     last_page_number = int(last_page.text)
-    # print(f"The last page number is {last_page_number}")
 
     # Iterating through the pistol pages and getting the data
     while iteration < last_page_number + 1:
@@ -383,13 +567,48 @@ def get_mge_wholesale_data():
             new_link_text = new_link.get_attribute("href")
             links_to_firearms.append(new_link_text)
 
+        # Cleaning Price verbiage
+        price_list = []
+        new_item = ''
+        for item in cost_pistol_text_fixed:
+            # text = item.text
+            if item.isdigit() or item == '$' or item == '.':
+                new_item += item
+            price_list.append(new_item)
+            new_item = ''
+
+
+        # Cleaning stock status verbiage
+        stock_status_list = []
+        for item in stock_status_unorganized:
+            text = item.text
+            new_item = ''
+            for item in text:
+                if item.isdigit():
+                    new_item += item
+            if new_item:
+                stock_status_list.append(new_item)
+            else:
+                stock_status_list.append('Out of Stock')
+
+        # Separating the model and brand
+        brand_list = []
+        model_list = []
+        for item in firearm_type:
+            text = item.text
+            brand, model = text.split(' ', 1)
+            brand_list.append(brand)
+            model_list.append(model)
+
         # Actually organizing the data into a dictionary
         for n in range(len(firearm_type)):
             rifle_list[n + (previous_items_shown * ITEMS_PER_PAGE)] = {
-                "firearm_type": firearm_type[n].text,
-                "price": cost_pistol_text_fixed[n],
+                "brand": brand_list[n],
+                "model": model_list[n],
+                "price": price_list[n],
                 "link": links_to_firearms[n],
-                "stock_status": stock_status_unorganized[n].text,
+                "stock_status": stock_status_list[n],
+                "vendor": "MGE Wholesale"
             }
             previous_items_shown += len(firearm_type)
         time.sleep(1)
@@ -431,6 +650,7 @@ def get_mge_wholesale_data():
     # Getting Data from Rifle Frame page
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -446,18 +666,51 @@ def get_mge_wholesale_data():
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         rifle_frame_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
-
-    # print(f"This is the Rifle Frame List: {rifle_frame_list}")
 
     # SHOTGUN
     # Moving from Rifle Frame to Shotgun page
@@ -474,6 +727,7 @@ def get_mge_wholesale_data():
     # Getting Data from Shotgun
     firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
     cost = driver.find_elements(By.CLASS_NAME, "price-sales")
+    cost_text = [item.text for item in cost]
     link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
     stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
     for item in stock_status_unorganized:
@@ -489,14 +743,49 @@ def get_mge_wholesale_data():
         new_link_text = new_link.get_attribute("href")
         links_to_firearms.append(new_link_text)
 
+    # Cleaning Price verbiage
+    price_list = []
+    new_item = ''
+    for item in cost_text:
+        for letter in item:
+            if letter.isdigit() or letter == '$' or letter == '.':
+                new_item += letter
+        price_list.append(new_item)
+        new_item = ''
+
+
+    # Cleaning stock status verbiage
+    stock_status_list = []
+    for item in stock_status_unorganized:
+        text = item.text
+        new_item = ''
+        for item in text:
+            if item.isdigit():
+                new_item += item
+        if new_item:
+            stock_status_list.append(new_item)
+        else:
+            stock_status_list.append('Out of Stock')
+
+    # Separating the model and brand
+    brand_list = []
+    model_list = []
+    for item in firearm_type:
+        text = item.text
+        brand, model = text.split(' ', 1)
+        brand_list.append(brand)
+        model_list.append(model)
+
     # Actually organizing the data into a dictionary
     previous_items_shown = 0
     for n in range(len(firearm_type)):
         shotgun_list[n] = {
-            "firearm_type": firearm_type[n].text,
-            "price": cost[n].text,
+            "brand": brand_list[n],
+            "model": model_list[n],
+            "price": price_list[n],
             "link": links_to_firearms[n],
-            "stock_status": stock_status_unorganized[n].text,
+            "stock_status": stock_status_list[n],
+            "vendor": "MGE Wholesale"
         }
         previous_items_shown += 1
 
@@ -523,7 +812,6 @@ def get_mge_wholesale_data():
     # IF IT DECREASES IT HAS TO CHANGE, LIKELY TO li[3] or less
     last_page = driver.find_element(By.XPATH, "/html/body/div[2]/div[6]/div/div[2]/div/div[2]/div[1]/div/ul/li[2]/a")
     last_page_number = int(last_page.text)
-    # print(f"The last page number is {last_page_number}")
     iteration = 0
 
     # Iterating through the california compliant pages and getting the data
@@ -531,6 +819,8 @@ def get_mge_wholesale_data():
         iteration += 1
         # Getting Data from California Compliant Page
         firearm_type = driver.find_elements(By.CLASS_NAME, "boxtext")
+        firearm_type_text = [item.text for item in firearm_type]
+        print(f"firearm_type_text: {firearm_type_text}")
         cost_california_compliant = driver.find_elements(By.CLASS_NAME, "price-sales")
         link_to_firearm_unorganized = driver.find_elements(By.CLASS_NAME, "col-centered")
         stock_status_unorganized = driver.find_elements(By.CLASS_NAME, "quantity")
@@ -548,9 +838,7 @@ def get_mge_wholesale_data():
             if "Sale" in item:
                 temp_list = item.splitlines()
                 old_price = temp_list[0]
-                # print(f"The old price was {old_price}")
                 sale_price = temp_list[1]
-                # print(f"The sale price is {sale_price}")
                 cost_california_compliant_text_fixed.append(sale_price)
             else:
                 cost_california_compliant_text_fixed.append(item)
@@ -563,13 +851,46 @@ def get_mge_wholesale_data():
             new_link_text = new_link.get_attribute("href")
             links_to_firearms.append(new_link_text)
 
+        # Cleaning Price verbiage
+        price_list = []
+        new_item = ''
+        for item in cost_california_compliant_text_fixed:
+            for letter in item:
+                if letter.isdigit() or letter == '$' or letter == '.':
+                    new_item += letter
+            price_list.append(new_item)
+            new_item = ''
+
+        # Cleaning stock status verbiage
+        stock_status_list = []
+        for item in stock_status_unorganized:
+            text = item.text
+            new_item = ''
+            for item in text:
+                if item.isdigit():
+                    new_item += item
+            if new_item:
+                stock_status_list.append(new_item)
+            else:
+                stock_status_list.append('Out of Stock')
+
+        # Separating the model and brand
+        brand_list = []
+        model_list = []
+        for item in firearm_type_text:
+            brand, model = item.split(' ', 1)
+            brand_list.append(brand)
+            model_list.append(model)
+
         # Actually organizing the data into a dictionary
         for n in range(len(firearm_type)):
             california_compliant_list[n +(previous_items_shown * ITEMS_PER_PAGE)] = {
-                "firearm_type": firearm_type[n].text,
-                "price": cost_california_compliant_text_fixed[n],
+                "brand": brand_list[n],
+                "model": model_list[n],
+                "price": price_list[n],
                 "link": links_to_firearms[n],
-                "stock_status": stock_status_unorganized[n].text,
+                "stock_status": stock_status_list[n],
+                "vendor": "MGE Wholesale"
             }
             previous_items_shown += len(firearm_type)
         time.sleep(1)
@@ -584,13 +905,11 @@ def get_mge_wholesale_data():
             pass
         time.sleep(.5)
 
-    # print(f"The California Compliant list is {california_compliant_list}")
     time.sleep(.5)
     driver.quit()
 
     # Setting up the headers to write into the CSV
     headers = list_categories
-    # print(f"The headers are {headers}")
 
     # Removing the annoying 0 in the dictionaries to make them true dictionaries
     new_derringer_list = [value for value in derringer_list.values()]
@@ -613,60 +932,6 @@ def get_mge_wholesale_data():
         writer.writeheader()
         writer.writerows(master_list)
 
-    # TODO need to adjust to write to table in userdata.db
-    # Writing to DB
-    import sqlite3
-
-    from flask import Flask
-    from flask_sqlalchemy import SQLAlchemy
-    import csv
-    app = Flask(__name__)
-    DB_NAME = "userdata.db"
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_NAME}"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
-
-
-    class ItemsTest(db.Model):
-        __tablename__ = "mge"
-        id = db.Column(db.Integer, primary_key=True, unique=True)
-        item = db.Column(db.String(500), unique=False)
-        price = db.Column(db.String(250), unique=False)
-        quantity = db.Column(db.String(250), unique=False)
-        link = db.Column(db.String(1000), unique=False)
-
-    db.create_all()
-    # Change path before deployment
-    # TODO: remove reading from CSV in production, just go straight from the dict/list to writing to db
-    with open(r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\mge_wholesale_data.csv") as file:
-        # reading the CSV file
-        csvFile = csv.reader(file)
-        headers = next(csvFile)
-        counter = 0
-        # accessing and deleting from the database
-        connection = sqlite3.connect(DB_NAME)
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM mge")
-        connection.commit()
-        connection.close()
-        # Creating a list to check against to avoid unique attribute failed error
-        items_in_db_already = []
-        # Writing to the database
-        for lines in csvFile:
-            if lines[0] in items_in_db_already:
-                continue
-            else:
-                items_in_db_already.append(lines[0])
-                new_entry = ItemsTest(
-                    item=lines[0],
-                    price=lines[1],
-                    quantity=lines[3],
-                    link=lines[2]
-                )
-                counter +=1
-                db.session.add(new_entry)
-        print(counter)
-        db.session.commit()
 
 
 get_mge_wholesale_data()

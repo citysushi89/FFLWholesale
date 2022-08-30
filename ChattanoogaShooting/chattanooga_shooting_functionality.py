@@ -1,13 +1,12 @@
 import csv
-
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 import time, os
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions
-from functions import upload_to_bucket
+import math
+from functions import clean_firearm_type, clean_stock_status_orion
 
 def get_chattanooga_shooting_data():
     # Setting up connection to driver and site
@@ -80,8 +79,12 @@ def get_chattanooga_shooting_data():
     total_items_part_one = items_on_screen_text[9:10]
     total_items_part_two = items_on_screen_text[11:14]
     total_items = int(total_items_part_one + total_items_part_two)
+    pages_rounded_down = math.trunc(total_items / 100)
+    print(total_items)
 
     # Declaring lists so they can be made global and accessed outside of the loop
+    master_brand_list = []
+    master_model_list = []
     master_firearm_type_list = []
     master_link_list = []
     master_cost_list = []
@@ -101,6 +104,9 @@ def get_chattanooga_shooting_data():
         for item in firearm_type:
             new_firearm = item.text
             firearm_type_list.append(new_firearm)
+
+        # TODO clean firearm type list here
+        brand_list, model_list = clean_firearm_type(firearm_type_list)
 
         # Getting links
         link_list = []
@@ -146,12 +152,13 @@ def get_chattanooga_shooting_data():
         for item in stock_status:
             new_stock_status = item.text
             stock_status_list.append(new_stock_status)
+        clean_stock_status = clean_stock_status_orion(stock_status_list)
 
         def click_next_page():
             # Scrolling to bottom of page
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(1)
-            if iteration <= 3 or iteration > 49:
+            if iteration <= 3 or iteration > (pages_rounded_down - 2):
                 try:
                     # Finding and clicking next page
                         next_page_button = driver.find_element(By.XPATH,
@@ -170,13 +177,18 @@ def get_chattanooga_shooting_data():
             elif iteration > 3:
                 next_page_button = driver.find_element(By.XPATH,
                                                        "/html/body/main/section/div/div[2]/section[2]/div/div[2]/div/div/div/ul/li[11]/a/span")
+                "/html/body/main/section/div/div[2]/section[2]/div/div[2]/div/div/div/ul/li[9]"
                 next_page_button.click()
         time.sleep(.5)
+
         # Adding to master list
-        master_firearm_type_list.append(firearm_type_list)
+        # TODO uncomment
+        master_brand_list.append(brand_list)
+        master_model_list.append(model_list)
+        # master_firearm_type_list.append(firearm_type_list)
         master_link_list.append(link_list)
         master_cost_list.append(cost_list)
-        master_stock_status_list.append(stock_status_list)
+        master_stock_status_list.append(clean_stock_status)
 
 
         # Checking again how many items are shown - NEEDS TO BE LAST THING BEFORE NEXT PAGE CLICK
@@ -184,64 +196,56 @@ def get_chattanooga_shooting_data():
         iteration += 1
         items_shown_so_far = iteration * 100
 
-        length_of_a_list = len(master_firearm_type_list)
+        length_of_a_list = len(master_link_list)
 
         # Organizing all into one list in order: 0) type 1) cost 2) link 3) Stock Status
         for i in range(0, length_of_a_list):
             place_holder_list = []
-            place_holder_list.append(master_firearm_type_list[0][i])
+            place_holder_list.append(master_brand_list[0][i])
+            place_holder_list.append(master_model_list[0][i])
+            # place_holder_list.append(master_firearm_type_list[0][i])
             place_holder_list.append(master_cost_list[0][i])
             place_holder_list.append(master_link_list[0][i])
             place_holder_list.append(master_stock_status_list[0][i])
+            place_holder_list.append('Chattanooga Shooting')
+            print()
             master_list.append(place_holder_list)
 
+        print(f"1: {master_list}")
         click_next_page()
         time.sleep(1)
 
     # END OF ITERATIONS
 
     # To close - REMOVE LATER
-    time.sleep(2)
-    driver.quit()
-
-    #New writing to google cloud below
-    import os
-    from google.cloud import storage
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "google_service_key.json"
-    storage_client = storage.Client()
-
-    # Creating a new Bucket
-    bucket_name = 'individual_reports'
-    bucket = storage_client.bucket(bucket_name)
-
-    # Uploading files
-    def upload_to_bucket(file_name, file_path, bucket_name):
-        try:
-            bucket = storage_client.get_bucket(bucket_name)
-            file = bucket.blob(file_name)
-            file.upload_from_filename(file_path)
-            return True
-        except Exception as e:
-            print(e)
-            return False
-
-    # END
-
+    # time.sleep(2)
+    # driver.quit()
 
 
     # Writing to csv
     # Setting up the headers to write into the CSV
-    chattanooga_file = "\\Data\\WholesalerReports\\chattanooga_shooting_data_encoded.csv"
+    chattanooga_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\chattanooga_shooting_data_encoded.csv"
     # chattanooga_file = "C:\\Users\\Owen\\Documents\\Personal Info\\Independent Courses\\Python Learning\\fflwholesalerproductpps\\Data\\WholesalerReports\\chattanooga_shooting_data.csv"
-    new_chattanooga_file = "\\Data\\WholesalerReports\\chattanooga_shooting_data.csv"
-    headers = ["firearm_type", "price", "link", "stock_status"]
+    new_chattanooga_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\chattanooga_shooting_data.csv"
+    headers = ["brand", "model", "price", "link", "stock_status", "vendor"]
     with open(chattanooga_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
         writer.writerows(master_list)
+        print(master_list)
 
     with open(chattanooga_file, 'r', encoding='cp1252') as inp, \
             open(new_chattanooga_file, 'w', encoding='ascii') as output_file_chattanooga:
         for line in inp:
-            output_file_chattanooga.write(line)
+            try:
+                output_file_chattanooga.write(line)
+                print(line)
+            except UnicodeEncodeError:
+                pass
     os.remove(chattanooga_file)
+
+
+get_chattanooga_shooting_data()
+
+# TODO
+# stock status - just number or out of stock

@@ -9,8 +9,8 @@ import selenium.common.exceptions
 import csv, os
 from functions import open_url, click_login_button, fill_in_login_boxes, click_firearms_tab, maximize_page_size, \
     convert_selenium_objects_to_list, convert_selenium_objects_to_list_of_links, \
-    convert_selenium_objects_to_list_zanders_cost
-from functions import upload_to_bucket
+    convert_selenium_objects_to_list_zanders_cost, clean_stock_grice, clean_firearm_type, clean_price
+
 
 def get_zanders_data():
     s = Service("C:/Users/Owen/Documents/Personal Info/Independent Courses/Python Learning/chromedriver")
@@ -52,12 +52,14 @@ def get_zanders_data():
         firearm_type_list = convert_selenium_objects_to_list(firearm_type)
         time.sleep(.2)
         items_per_page = len(firearm_type_list)
+        brand_list, model_list = clean_firearm_type(firearm_type_list)
 
         # Getting Price
         cost = driver.find_elements(By.CLASS_NAME, "price-container")
         # IF a sale: removing the previous price and just displaying the sale price
         # cannot use functions.py convert selenium objects to list because there is something for that already
         cost_list = convert_selenium_objects_to_list_zanders_cost(input_list=cost)
+        clean_cost_list = clean_price(cost_list)
         time.sleep(.2)
 
         # Getting Link
@@ -84,15 +86,19 @@ def get_zanders_data():
                 stock_status_list_formatted.insert(item_index, new_item)
             else:
                 stock_status_list_formatted.append(item)
+
+        clean_stock_status = clean_stock_grice(stock_status_list_formatted)
         time.sleep(.5)
 
 
-        for i in range(0, len(firearm_type_list)):
+        for i in range(0, len(link_list)):
             place_holder_list = []
-            place_holder_list.append(firearm_type_list[i])
-            place_holder_list.append(cost_list[i])
+            place_holder_list.append(brand_list[i])
+            place_holder_list.append(model_list[i])
+            place_holder_list.append(clean_cost_list[i])
             place_holder_list.append(link_list[i])
-            place_holder_list.append(stock_status_list_formatted[i])
+            place_holder_list.append(clean_stock_status[i])
+            place_holder_list.append("Zanders")
             master_list.append(place_holder_list)
         total_length = len(master_list)
         print(f"Total items so far: {total_length}")
@@ -111,9 +117,9 @@ def get_zanders_data():
                 break
 
 
-    headers = ["firearm_type", "price", "link", "stock_status"]
-    zanders_file = "\\static/Data\\WholesalerReports\\zanders_data_encoded.csv"
-    new_zanders_file = "\\Data\\WholesalerReports\\zanders_data.csv"
+    headers = ["brand", "model", "price", "link", "stock_status", "vendor"]
+    zanders_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\zanders_data_encoded.csv"
+    new_zanders_file = r"C:\Users\Owen\Documents\Personal Info\Independent Courses\Python Learning\fflwholesalerproductpps\Data\WholesalerReports\zanders_data.csv"
     with open(zanders_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
@@ -124,4 +130,7 @@ def get_zanders_data():
         for line in inp:
             output_file_orion.write(line)
     os.remove(zanders_file)
+
+get_zanders_data()
+
 

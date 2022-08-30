@@ -11659,3 +11659,26 @@ footer a:hover, footer a:active, footer a:focus {
     max-width: 15%;
     width: 15px;
 }
+
+/* Run Report Page */
+tr:nth-child(even) {
+  background-color: #dbdbdb;
+}
+
+.run-report-table {
+  /* margin: 10%; */
+  padding: 100px;
+}
+
+.table-header {
+  width: 250px;
+  position: sticky;
+}
+
+.table-header-title {
+  /* min-width: 25%; */
+}
+
+/* #myTable {
+  border-collapse: collapse;
+} */

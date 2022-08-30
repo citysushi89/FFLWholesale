@@ -1,6 +1,5 @@
-TODO: STATUS Aug 2, 2022: Run report page reading and displaying mge table from wholesaler_data.db,
-TODO: need to figure out how to send this to the customer ... email, download, or display in browser?
-TODO: display in browser to start?
+TODO: STATUS Aug 3, 2022: Run report page reading and displaying mge table from wholesaler_data.db, add pagination to the table
+TODO: add pagination to the table, format a bit better, add other wholesalers
 
 Currently:
 Report needs to be run manually once launched, not automated
@@ -10,8 +9,6 @@ Things to be automatic eventually:
 Use Python Anywhere? <-- was a big pain (likely due to trying to save data locally)
 
 Before Launch:
-# TODO currently: mge can write to SQL database, decide how to write others...
-# TODO currently: (use tables in one DB, try to convert to Postgres?)
 # TODO: MGE - spitting "Our Price $xxx" and "Sale Price $xxx" into the same field in the CSV
 # TODO: Change various functionality pages to include writing to the google cloud OR a db
 # TODO: create a try except framework in writing to each functionality, should make it friendly to running local and nonlocal
