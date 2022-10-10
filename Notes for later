@@ -9,9 +9,7 @@ Things to be automatic eventually:
 Use Python Anywhere? <-- was a big pain (likely due to trying to save data locally)
 
 Before Launch:
-# TODO: MGE - spitting "Our Price $xxx" and "Sale Price $xxx" into the same field in the CSV
-# TODO: Change various functionality pages to include writing to the google cloud OR a db
-# TODO: create a try except framework in writing to each functionality, should make it friendly to running local and nonlocal
+# TODO: create a try except framework in writing to each functionality, should make it friendly to running local and nonlocalgit 
 
 After Launch:
     Necessary "real launch" base features:
