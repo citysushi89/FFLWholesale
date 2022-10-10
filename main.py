@@ -10,8 +10,7 @@ import sys
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user, login_required
 from flask_bootstrap import Bootstrap
-from functions import run_report_based_on_time, run_report_for_testing_purposes, combine_user_csvs, \
-    download_file_from_bucket
+from functions import run_report_based_on_time, run_report_for_testing_purposes, combine_user_csvs
 # Below imports a module that outputs more info in Heroku logs
 import logging
 
